@@ -36,14 +36,22 @@ GO
 --docs.microsoft.com/en-us/sql/t-sql/statements/drop-login-transact-sql?view=sql-server-ver15
 --------------------------------------------------------------------------------------------
 
+---------------BEGIN step 1------------------------------------------------------------------
+--this is settting up on the source db - in this case its the one tim has setup  - but essentially its like creating a read only account on the source db
+
 --USE [master]
 
 --GO
 
 ----create a server level login name 'jobmanager' with a password
---CREATE LOGIN bensManager WITH PASSWORD = 'beng123';
+--CREATE LOGIN bgmanager WITH PASSWORD = 'beng123';
 
 --GO
+
+---------------END step 1-------------------------------------------------------------------
+
+---------------BEGIN step 2------------------------------------------------------------------
+--then using the actual db we wwant to target wse create a user for our server level login
 
 ----set context to msdb database
 --USE [DDDM_TPS_1];
@@ -51,24 +59,34 @@ GO
 --GO
 
 ----added databse user and their name and link it to server level login above
---CREATE USER bensManager FOR LOGIN bensManager;
+--CREATE USER bgmanager FOR LOGIN bgmanager;
 --GO
 
---exec sp_addrolemember 'db_datareader', bensManager;
+--exec sp_addrolemember 'db_datareader', bgmanager;
+
+---------------END step 2-------------------------------------------------------------------
 
 -------------------------------------------------------------
 ---------this is on the datawarehouse database---------------
 -------------------------------------------------------------
 
+---then on the shared db / or alternatively the one i created we connect to the source db from our db
+
+CREATE DATABASE BensNHDW
+
+USE [BensNHDW];
+
 SELECT *
 FROM
-OPENROWSET('SQLNCLI', 'Server=dad.cbrifzw8clzr.us-east-1.rds.amazonaws.com;UID=bensManager;PWD=beng123;', 
+OPENROWSET('SQLNCLI', 'Server=dad.cbrifzw8clzr.us-east-1.rds.amazonaws.com;UID=bgmanager;PWD=beng123;', 
 'SELECT * FROM DDDM_TPS_1.dbo.PATIENT') source;
 
 ------------------------------------------------------------------
+--THEN RUN THIS SCRIPT TO CREATE THE DW
+------------------------------------------------------------------
 
 
---use DW1272
+--USE [BensNHDW]
 
 --DROP TABLE IF EXISTS DIMSTAFF;
 --DROP TABLE IF EXISTS DIMTREATMENT;
@@ -179,16 +197,24 @@ OPENROWSET('SQLNCLI', 'Server=dad.cbrifzw8clzr.us-east-1.rds.amazonaws.com;UID=b
 --SOURCE_ID NVARCHAR(50), -- THE KEY FROM THE TPS TABLE 
 --SOURCE_TABLE NVARCHAR(50), -- THE TABLE NAME
 --FILTERID INTEGER, -- THE CORRSPONDING FILTER ID THAT TRIGGERS THE ERRROR
---DATETIME DATETIME, -- (2021-09-01 12:12:22.00)
+--DATE_TIME DATETIME, -- (2021-09-01 12:12:22.00)
 --ACTION NVARCHAR(50), --'SKIP','MODIFY'
 --CONSTRAINT ERROREVENTACTION CHECK (ACTION IN ('SKIP','MODIFY'))
 --);
 
 --GO
 
+--CREATE TABLE ETL_LOG (
+--SOURCE_PROCEDURE NVARCHAR(100), -- THIS TELLS YOU THE PROCEDURE THAT CREATES THE LOG ENTRY E.G DIM_PATIENT
+--ETL_EVENT_DATETIME DATETIME, -- (2021-09-01 12:12:22.00)
+--EVENT_DETAILS NVARCHAR(MAX), -- THE DETAILS OR MESSAGE -- PROBABLY AN ERROR MESSAGE(WITH A CODE) OR SUCCESS MESSAGE
+--);
+
+--GO
 
 
---------------------------------------------------------------------------------------
---------------Filters area------------------------------------------------------------
---------------------------------------------------------------------------------------
+
+
+
+
 

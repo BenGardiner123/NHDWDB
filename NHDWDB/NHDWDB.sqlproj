@@ -60,4 +60,9 @@
   <ItemGroup>
     <None Include="DWDDL.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <Build Include="DIM_PATIENT_FILTER_1.sql" />
+    <Build Include="ETL_DIM_PATIENT.sql" />
+    <Build Include="DIM_PATIENT_FILTER_2.sql" />
+  </ItemGroup>
 </Project>
