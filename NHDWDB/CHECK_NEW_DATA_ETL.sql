@@ -1,0 +1,54 @@
+﻿-- CREATE GET CONNECTION STRING FUNCTION.
+-- :SETVAR SOURCEURL 10
+DROP FUNCTION IF EXISTS GET_CONNECTION_STRING;
+GO
+CREATE FUNCTION GET_CONNECTION_STRING() RETURNS NVARCHAR(MAX) AS
+BEGIN
+    RETURN 'Server=dad.cbrifzw8clzr.us-east-1.rds.amazonaws.com;UID=ldtreadonly;PWD=Kitemud$41;';
+END;
+GO
+-- CREATE A COMMAND STRING.
+BEGIN
+    DECLARE @COMMAND1 NVARCHAR(MAX);
+    SET @COMMAND1 = 'SELECT * FROM OPENROWSET(''SQLNCLI'', ' +
+                    '''Server=dad.cbrifzw8clzr.us-east-1.rds.amazonaws.com;UID=ldtreadonly;PWD=Kitemud$41;'',' +
+                    '''SELECT * FROM DDDM_TPS_1.dbo.PATIENT'');'
+    -- PRINT(@COMMAND1);          
+    EXEC(@COMMAND1);
+END
+-- CREATE A COMMAND STRING WITH WHERE LOGIC.
+BEGIN
+    DECLARE @COMMAND2 NVARCHAR(MAX);
+    SET @COMMAND2 = 'SELECT * FROM OPENROWSET(''SQLNCLI'', ' +
+                    '''Server=dad.cbrifzw8clzr.us-east-1.rds.amazonaws.com;UID=ldtreadonly;PWD=Kitemud$41;'',' +
+                    '''SELECT * FROM DDDM_TPS_1.dbo.PATIENT WHERE URNUMBER NOT IN (900000001, 900000002)'');'
+    -- PRINT(@COMMAND2);          
+    EXEC(@COMMAND2);
+END
+-- CREATE A COMMAND STRING USING ROWNUMS.
+-- SELECT * FROM LIST_OF_ROWNUMS;
+BEGIN
+-- GO AND GET THE CONNECTION STRING.
+    DECLARE @CONNSTRING NVARCHAR(MAX);
+    EXEC @CONNSTRING = GET_CONNECTION_STRING;
+-- SET UP A STRING OF XXX TO EXCLUDE FROM COMMAND
+    DECLARE @ROWNUMS NVARCHAR(MAX);
+    SELECT @ROWNUMS = COALESCE(@ROWNUMS + ',', '') + ROWNUM
+    FROM NHDW_LDT_0214.DBO.LIST_OF_ROWNUMS
+    PRINT (@ROWNUMS);
+--CREATE THE COMMAND TO SEND TO THE OTHER SERVER
+    DECLARE @COMMAND NVARCHAR(MAX);
+    SET @COMMAND = 'SELECT * FROM OPENROWSET(''SQLNCLI'', ' +
+                    '''' + @CONNSTRING + ''',' +
+                    '''SELECT * FROM DDDM_TPS_1.dbo.PATIENT WHERE URNUMBER NOT IN (' + @ROWNUMS + ')'');'
+    -- PRINT(@COMMAND);          
+    EXEC(@COMMAND);
+END
+-- BEGIN
+--     DECLARE @COMMAND3 NVARCHAR(MAX);
+--     SET @COMMAND3 = 'SELECT * FROM OPENROWSET(''SQLNCLI'', ' +
+--                     '''Server=dad.cbrifzw8clzr.us-east-1.rds.amazonaws.com;UID=ldtreadonly;PWD=Kitemud$41;'',' +
+--                     '''SELECT * FROM DDDM_TPS_1.dbo.PATIENT WHERE URNUMBER NOT IN (' + @ROWNUMS + ')'');'
+--     -- PRINT(@COMMAND3);          
+--     EXEC(@COMMAND3);
+-- END
