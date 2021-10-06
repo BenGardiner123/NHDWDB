@@ -1,45 +1,78 @@
-﻿CREATE PROCEDURE ETL AS
-BEGIN
-	--trans
-	--CALL ETL PROCEDURES FROM EACH SOURCE DB
-	EXEC ETL_NHRM
-	--end trans
-END;
+﻿--CREATE PROCEDURE ETL AS
+--BEGIN
+--	--trans
+--	--CALL ETL PROCEDURES FROM EACH SOURCE DB
+--	EXEC ETL_NHRM
+--	--end trans
+--END;
 
-CREATE PROCEDURE ETL_NHRM AS 
-BEGIN
-	-- FOR EACH DIMENSION  /FACT TABLE IN THE THE DW WE'LL HAVE ONE SP TO CALL
-	 -- THE ORDER CALL IS IMPORTANT -DIMENSIONS BEFORE FACTS
-	 -- FOCUS ON PATIENT / MEASUREMENT /DATAPOINT 
+--CREATE PROCEDURE ETL_NHRM AS 
+--BEGIN
+--	-- FOR EACH DIMENSION  /FACT TABLE IN THE THE DW WE'LL HAVE ONE SP TO CALL
+--	 -- THE ORDER CALL IS IMPORTANT -DIMENSIONS BEFORE FACTS
+--	 -- FOCUS ON PATIENT / MEASUREMENT /DATAPOINT 
 
-	 EXEC ETL_NHRM_PATIENT
-	 EXEC ETL_NHRM_MEASUREMENT
-	 EXEC ETL_NHRM_DATAPOINT
-END;
-
-
-CREATE PROCEDURE ETL_NHRM AS 
-BEGIN
-	-- WE ONLY WANT TO CALL THE DATA OVER THE NETWORK ONCE
-	 -- WE ONLY WANT TO GET THE MINIMUM REQUIRED DATA
-	 -- AVOID MAKING PERMAMNENT COPIES ON THE DW SIDE
-
-	 EXEC ETL_NHRM_PATIENT
-	 EXEC ETL_NHRM_MEASUREMENT
-	 EXEC ETL_NHRM_DATAPOINT
-
-	 -- query that exludes data allready in EE and DW
-	 -- get required dat from source
-		-- store that data in a no permament way  to pass between vaious ETL procedures
-		-- apply any filters to the data
-		-- insert the good data
-		-- insert any data which the fiklter needs to be transofmred -- transform
-END;
+--	 EXEC ETL_NHRM_PATIENT
+--	 EXEC ETL_NHRM_MEASUREMENT
+--	 EXEC ETL_NHRM_DATAPOINT
+--END;
 
 
-create procedure va_select_test as 
+--CREATE PROCEDURE ETL_NHRM AS 
+--BEGIN
+--	-- WE ONLY WANT TO CALL THE DATA OVER THE NETWORK ONCE
+--	 -- WE ONLY WANT TO GET THE MINIMUM REQUIRED DATA
+--	 -- AVOID MAKING PERMAMNENT COPIES ON THE DW SIDE
 
-Begin
+--	 EXEC ETL_NHRM_PATIENT
+--	 EXEC ETL_NHRM_MEASUREMENT
+--	 EXEC ETL_NHRM_DATAPOINT
+
+--	 -- query that exludes data allready in EE and DW
+--	 -- get required dat from source
+--		-- store that data in a no permament way  to pass between vaious ETL procedures
+--		-- apply any filters to the data
+--		-- insert the good data
+--		-- insert any data which the fiklter needs to be transofmred -- transform
+--END;
+
+------------------------------------------------------------------------------------------------------------------
+
+
+USE NHDW
+DROP TYPE IF EXISTS TestPatientTable;
+GO
+-- Create a PatientTableType to be used as a variable of a non permanent storage 
+
+CREATE TYPE TestPatientTable AS TABLE (
+
+    DWDIM_SOURCEID       NVARCHAR(100),
+
+    Gender               NVARCHAR(100),
+
+    YEAROFBIRTH          INT,
+
+    Suburb               NVARCHAR(100),
+
+    PostCode             NVARCHAR(4),
+
+    CountryOfBirth       NVARCHAR(100),
+
+    LivesAlone           BIT,
+
+    Active               BIT,
+
+	Diagnosis            NVARCHAR(500),
+
+    CategoryName         NVARCHAR(100),
+
+    ProcedureDate        DATETIME
+
+);
+
+GO
+
+
 	--		
 	declare @Testatbletype Testtabletype;
 	
