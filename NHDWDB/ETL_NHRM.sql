@@ -42,53 +42,61 @@
 USE NHDW
 DROP TYPE IF EXISTS TestPatientTable;
 GO
--- Create a PatientTableType to be used as a variable of a non permanent storage 
 
-CREATE TYPE TestPatientTable AS TABLE (
+-- Create a table varible to pass the new data into - then we can pass this into each filter
 
+CREATE TYPE TESTPATIENTTABLE AS TABLE (
     DWDIM_SOURCEID       NVARCHAR(100),
-
-    Gender               NVARCHAR(100),
-
+    GENDER               NVARCHAR(100),
     YEAROFBIRTH          INT,
-
-    Suburb               NVARCHAR(100),
-
-    PostCode             NVARCHAR(4),
-
-    CountryOfBirth       NVARCHAR(100),
-
-    LivesAlone           BIT,
-
-    Active               BIT,
-
-	Diagnosis            NVARCHAR(500),
-
-    CategoryName         NVARCHAR(100),
-
-    ProcedureDate        DATETIME
-
+    SUBURB               NVARCHAR(100),
+    POSTCODE             NVARCHAR(4),
+    COUNTRYOFBIRTH       NVARCHAR(100),
+    LIVESALONE           BIT,
+    ACTIVE               BIT,
+	DIAGNOSIS            NVARCHAR(500),
+    CATEGORYNAME         NVARCHAR(100),
+    PROCEDUREDATE        DATETIME
 );
 
 GO
 
+USE NHDW
+DROP TYPE IF EXISTS TestmeASUREMENTTable;
 
-	--		
-	declare @Testatbletype Testtabletype;
-	
-	declare @command nvarchar(max)
+GO
 
-	set @command  = 'SELECT * FROM OPENROWSET(''SQLNCLI'', ' +
-                    '''Server=dad.cbrifzw8clzr.us-east-1.rds.amazonaws.com;UID=ldtreadonly;PWD=Kitemud$41;'',' +
-                    '''SELECT * FROM DDDM_TPS_1.dbo.PATIENT'');'
-	insert into @testtable
-	exec(@commnad);
+-- Create a table varible to pass the new data into - then we can pass this into each filter
 
-	exec ETL_NHRM_PATIENT_FILTER1 @inTBALE = @testtable
-	exec ETL_NHRM_PATIENT_FILTER2 @inTBALE = @testtable
-	exec ETL_NHRM_PATIENT_FILTER3 @inTBALE = @testtable
+CREATE TYPE TESTMEASUREMENTTABLE AS TABLE (
+    MEASUREMENTID INT NOT NULL, --THE ID NUMBER RELATED TO EACH MEASUREMENT
+    DATAPOINTNUMBER INT NOT NULL, --EACH MEASUREMENT HAS EITHER ONE OR MANY DATA POINTS ASSOCIATED WITH IT, E.G., 1, 2, 3
+    MEASUREMENTNAME NVARCHAR(50) NOT NULL, --THE NAME OF THE MEASUREMENT TO BE TAKEN E.G., ”BREATHLESSNESS”
+    [NAME] NVARCHAR(50) NULL, --NAME OF THE DATA POINT MEASUREMENT  MATCHES UP WITH MEASUREMENT NAME E.G., ‘MOBILITY'
+    UPPERLIMIT INT NOT NULL, -- MAX REPORTABLE VALUE, E.G., 100, 600, 5  
+    LOWERLIMIT INT NOT NULL --MIN REPORTABLE VALUE E.G., 1, 0  
+);
 
-	exec ETL_NHRM_PATIENT_TRANSFER_GOOD @inTBALE = @testtable
+GO
+
+USE NHDW
+DROP TYPE IF EXISTS TEST_TREAMENT_TABLE AS TABLE;
+
+GO
+
+-- Create a table varible to pass the new data into - then we can pass this into each filter
+
+CREATE TYPE TESTMEASUREMENTTABLE AS TABLE (
+   
+   	DWDIM_SOURCEID INT NOT NULL,  -- THE UNIQUE IDENTIFIER FROM THE SOURCE DB
+    RECORDTYPE NVARCHAR(50) NOT NULL, -- E.G., MMR, MRI, COVID 
+    CATEGORY NVARCHAR(50) NOT NULL --THE CATEGORY THE TREATMENT FALLS UNDER E.G., “IMMUNISATION” 
+
+GO
+
+
+
+
 
 
 

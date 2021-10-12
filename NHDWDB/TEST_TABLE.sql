@@ -183,9 +183,91 @@ BEGIN
 END
 
 
+--ADDING THE SELCETS TO GET AL LTHE OTHER DIM TABLES----------------------------------------------------
+
+--SELECT M.MEASUREMENTID, DP.DATAPOINTNUMBER, M.MEASUREMENTNAME, DP.[NAME], DP.UPPERLIMIT, DP.LOWERLIMIT
+--FROM MEASUREMENT M
+--INNER JOIN DataPoint DP
+--ON M.MeasurementID = DP.MeasurementID
+
+--------------------THE sp FOR THE GET MEAUREMENTS----------------------------------------------------------
+
+--CREATE PROCEDURE TRANSFER_GOOD_NEW_MEASUREMENT_DATA 
+--as
+--begin
+
+--	--THIS CREATES A STRING WHICH IS A LIST OF THE SOURCE ID'S IN DWPATIENT
+--	DECLARE @ALREADY_IN_DIM NVARCHAR(MAX);
+--    SELECT @ALREADY_IN_DIM = COALESCE(@ALREADY_IN_DIM + ',', '') + NHDW.dbo.DIMEASUREMENT.MEASUREMENTID
+--    FROM NHDW.dbo.DIMEASUREMENT
+--	WHERE NHDW.dbo.DIMEASUREMENT.DWDIM_SOURCEDB = 'NHRM'
+
+--	--THIS CREATES A STRING WHICH IS A LIST OF THE SOURCE ID'S IN ERROREVENT
+--	DECLARE @ERROR_EVENT_EXISTING NVARCHAR(MAX);
+--	SELECT @ERROR_EVENT_EXISTING = COALESCE(@ERROR_EVENT_EXISTING + ',', '') +  ERROREVENT.SOURCE_ID
+--	FROM NHDW.dbo.ERROREVENT
+--	WHERE SOURCE_DB = 'NHRM'
+--	AND SOURCE_TABLE = 'DIMEASUREMENT';
+
+	
+	
+--	--COMBINE THE TWO LISTS OF NUMBERS INTO ONE VARIABLE TO BE PUSHED IN TTHE QUERY BELOW
+--	DECLARE @TO_EXCLUDE NVARCHAR(MAX);
+--	SET @TO_EXCLUDE = @ALREADY_IN_DIM + ', ' + @ERROR_EVENT_EXISTING;
+
+--	DECLARE @SELECTQUERY NVARCHAR(MAX);
+
+--	if @TO_EXCLUDE is not Null 
+--		Begin
+--			SET @SELECTQUERY = '''SELECT M.MEASUREMENTID, DP.DATAPOINTNUMBER, M.MEASUREMENTNAME,' +
+--                'DP.[NAME], DP.UPPERLIMIT, DP.LOWERLIMIT' +
+--				' FROM DDDM_TPS_1.DBO.MEASUREMENT M' +
+--				' INNER JOIN DataPoint DP' +
+--				' ON M.MeasurementID = DP.MeasurementID' +
+--                ' WHERE M.MEASUREMENTID NOT IN (' + @TO_EXCLUDE + ')''';
+--				PRINT(@SELECTQUERY)
+
+--		end
+--	else
+--		begin
+		
+--		   SET @SELECTQUERY = '''SELECT M.MEASUREMENTID, DP.DATAPOINTNUMBER, M.MEASUREMENTNAME,' +
+--                'DP.[NAME], DP.UPPERLIMIT, DP.LOWERLIMIT' +
+--				' FROM DDDM_TPS_1.DBO.MEASUREMENT M' +
+--				' INNER JOIN DDDM_TPS_1.DBO.DataPoint DP' +
+--				' ON M.MeasurementID = DP.MeasurementID''';
+--				PRINT(@SELECTQUERY)
+--		end
+
+--	-- write the code to get the required data - excludes those identified above.
+--    DECLARE @CONNSTRING NVARCHAR(MAX);
+--    EXECUTE @CONNSTRING = GET_CONNECTION_STRING;
+
+--    DECLARE @COMMAND NVARCHAR(MAX);
+--    SET @COMMAND =  'SELECT * FROM OPENROWSET(''SQLNCLI'', ' + '''' + @CONNSTRING + ''',' + @SELECTQUERY + ') SOURCE';
+    
+--    --EXECUTE(@COMMAND);
+	
+--	--declare a table varible to hold the data coming form the TPS system
+
+--	 declare @measurementTable TESTMEASUREMENTTABLE;
+--	 INSERT INTO @measurementTable
+--	 EXEC(@COMMAND);
+
+--	SELECT * FROM @measurementTable;
+
+--	 --EXEC ETL_FILTER_PROCESS_PATIENT @DATA = @PatientTable;
+
+		
+--END
+
+--------------------------------------------treatment table join----------------------------------------------------------------------
 
 
+SELECT 	RC.RecordCategoryID, RT.RecordType, RC.Category
+FROM RecordCategory RC
+INNER JOIN RecordType RT
+ON 	RC.RecordCategoryID = RT.RecordCategoryID
 
-
-
+----------------------------------------------
 	
