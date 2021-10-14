@@ -189,6 +189,7 @@ OPENROWSET('SQLNCLI', 'Server=dad.cbrifzw8clzr.us-east-1.rds.amazonaws.com;UID=b
 
 --CREATE TABLE DWDATE(   
 --	DATEKEY INTEGER PRIMARY KEY,  -- 1, 2, 3, further feilds to follow 
+
 --);
 
 --CREATE TABLE ERROREVENT (

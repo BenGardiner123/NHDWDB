@@ -63,6 +63,7 @@
     <None Include="ETL_NHRM.sql" />
     <None Include="TEST_TABLE.sql" />
     <None Include="CHECK_NEW_DATA_ETL.sql" />
+    <None Include="dateScript.sql" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="DIM_PATIENT_FILTER_2.sql" />
