@@ -8,17 +8,16 @@
 ----set up the remote login mechanaisim, ****for a regular server**** --------
 ------------------------------------------------------------------------------
 ------------need to modify the db instance to accept the new paramter group---
---use master;
+use master;
 
---exec sp_configure 'show advanced options', 1;  
+RECONFIGURE;
 
-----RECONFIGURE;
+exec sp_configure 'show advanced options', 1;  
 
---GO 
+RECONFIGURE;
 
---exec sp_configure 'Ad Hoc Distributed Queries', 1;  
+exec sp_configure 'Ad Hoc Distributed Queries', 1;  
 
-----RECONFIGURE;  
 
 GO  
 
@@ -65,21 +64,43 @@ GO
 --exec sp_addrolemember 'db_datareader', bgmanager;
 
 ---------------END step 2-------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
 
+-------------EXTRA STEP IF REQUIRED-- Verify that user is created on target db-------------
+--------------------------------------------------------------------------------------------
+
+
+--select name as username,
+--       create_date,
+--       modify_date,
+--       type_desc as type,
+--       authentication_type_desc as authentication_type
+--from sys.database_principals
+--where type not in ('A', 'G', 'R', 'X')
+--      and sid is not null
+--      and name != 'guest'
+--order by username;
+--------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
+
+---------------BEGIN step 3------------------------------------------------------------------
 -------------------------------------------------------------
 ---------this is on the datawarehouse database---------------
 -------------------------------------------------------------
 
 ---then on the shared db / or alternatively the one i created we connect to the source db from our db
 
-CREATE DATABASE BensNHDW
+--CREATE DATABASE BensNHDW
 
-USE [BensNHDW];
+
 
 SELECT *
 FROM
-OPENROWSET('SQLNCLI', 'Server=dad.cbrifzw8clzr.us-east-1.rds.amazonaws.com;UID=bgmanager;PWD=beng123;', 
+OPENROWSET('SQLNCLI', 'Server=db.cgau35jk6tdb.us-east-1.rds.amazonaws.com;UID=bgmanager;PWD=beng123;', 
 'SELECT * FROM DDDM_TPS_1.dbo.PATIENT') source;
+
+---------------END step 3------------------------------------------------------------------
+
 
 ------------------------------------------------------------------
 --THEN RUN THIS SCRIPT TO CREATE THE DW

@@ -48,7 +48,7 @@
 --   )
 
 
---DROP table IF EXISTS Dim_Date
+--DROP table IF EXISTS DWDATE
 
 --CREATE TABLE [dbo].[Dim_Date] (
 --   [DateKey] [int] NOT NULL,
@@ -96,7 +96,7 @@
 --   )
 
 
---   use NHDW
+--use NHDW
 
 --SET NOCOUNT ON
 
