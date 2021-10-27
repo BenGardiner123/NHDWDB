@@ -56,6 +56,8 @@
   <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>
     <Folder Include="Properties" />
+    <Folder Include="Filters" />
+    <Folder Include="Transfer_Good_data" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DWDDL.sql" />
@@ -64,8 +66,12 @@
     <None Include="TEST_TABLE.sql" />
     <None Include="CHECK_NEW_DATA_ETL.sql" />
     <None Include="dateScript.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <Build Include="DIM_PATIENT_FILTER_2.sql" />
+    <None Include="setup.sql" />
+    <None Include="Filters\Filter_Patient.sql" />
+    <None Include="Transfer_Good_data\etl nhrm patient.sql" />
+    <None Include="ETL.sql" />
+    <None Include="etl notes.sql" />
+    <None Include="Transfer_Good_data\ETL Measurement.sql" />
+    <None Include="Filters\Filter_measurement.sql" />
   </ItemGroup>
 </Project>

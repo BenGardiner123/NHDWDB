@@ -1,0 +1,102 @@
+﻿
+--CREATE PROCEDURE ETL_NHRM AS 
+--BEGIN
+--	-- FOR EACH DIMENSION  /FACT TABLE IN THE THE DW WE'LL HAVE ONE SP TO CALL
+--	 -- THE ORDER CALL IS IMPORTANT -DIMENSIONS BEFORE FACTS
+--	 -- FOCUS ON PATIENT / MEASUREMENT /DATAPOINT 
+
+--	 EXEC ETL_NHRM_PATIENT
+--	 EXEC ETL_NHRM_MEASUREMENT
+--	 EXEC ETL_NHRM_DATAPOINT
+--END;
+
+
+--CREATE PROCEDURE ETL_NHRM AS 
+--BEGIN
+--	-- WE ONLY WANT TO CALL THE DATA OVER THE NETWORK ONCE
+--	 -- WE ONLY WANT TO GET THE MINIMUM REQUIRED DATA
+--	 -- AVOID MAKING PERMAMNENT COPIES ON THE DW SIDE
+
+--	 EXEC ETL_NHRM_PATIENT
+--	 EXEC ETL_NHRM_MEASUREMENT
+--	 EXEC ETL_NHRM_DATAPOINT
+
+--	 -- query that exludes data allready in EE and DW
+--	 -- get required dat from source
+--		-- store that data in a no permament way  to pass between vaious ETL procedures
+--		-- apply any filters to the data
+--		-- insert the good data
+--		-- insert any data which the fiklter needs to be transofmred -- transform
+--END;
+
+------------------------------------------------------------------------------------------------------------------
+
+
+USE NHDW
+DROP TYPE IF EXISTS TestPatientTable;
+GO
+
+-- Create a table varible to pass the new data into - then we can pass this into each filter
+
+CREATE TYPE TESTPATIENTTABLE AS TABLE (
+    DWDIM_SOURCEID       NVARCHAR(100),
+    GENDER               NVARCHAR(100),
+    YEAROFBIRTH          INT,
+    SUBURB               NVARCHAR(100),
+    POSTCODE             NVARCHAR(4),
+    COUNTRYOFBIRTH       NVARCHAR(100),
+    LIVESALONE           BIT,
+    ACTIVE               BIT,
+	DIAGNOSIS            NVARCHAR(500),
+    CATEGORYNAME         NVARCHAR(100),
+    PROCEDUREDATE        DATETIME
+);
+
+GO
+
+USE NHDW
+DROP TYPE IF EXISTS TESTMEASUREMENTTABLE;
+
+GO
+
+-- Create a table varible to pass the new data into - then we can pass this into each filter
+
+CREATE TYPE TESTMEASUREMENTTABLE AS TABLE (
+    MEASUREMENTID INT NOT NULL, --THE ID NUMBER RELATED TO EACH MEASUREMENT
+    DATAPOINTNUMBER INT NOT NULL, --EACH MEASUREMENT HAS EITHER ONE OR MANY DATA POINTS ASSOCIATED WITH IT, E.G., 1, 2, 3
+    MEASUREMENTNAME NVARCHAR(50) NOT NULL, --THE NAME OF THE MEASUREMENT TO BE TAKEN E.G., ”BREATHLESSNESS”
+    [NAME] NVARCHAR(50) NULL, --NAME OF THE DATA POINT MEASUREMENT  MATCHES UP WITH MEASUREMENT NAME E.G., ‘MOBILITY'
+    UPPERLIMIT INT NOT NULL, -- MAX REPORTABLE VALUE, E.G., 100, 600, 5  
+    LOWERLIMIT INT NOT NULL --MIN REPORTABLE VALUE E.G., 1, 0  
+);
+
+GO
+
+USE NHDW
+DROP TYPE IF EXISTS TEST_TREAMENT_TABLE AS TABLE;
+
+GO
+
+-- Create a table varible to pass the new data into - then we can pass this into each filter
+
+CREATE TYPE TEST_TREAMENT_TABLE AS TABLE (
+   
+   	DWDIM_SOURCEID INT NOT NULL,  -- THE UNIQUE IDENTIFIER FROM THE SOURCE DB
+    RECORDTYPE NVARCHAR(50) NOT NULL, -- E.G., MMR, MRI, COVID 
+    CATEGORY NVARCHAR(50) NOT NULL --THE CATEGORY THE TREATMENT FALLS UNDER E.G., “IMMUNISATION” 
+
+GO
+
+
+
+
+
+
+
+
+
+
+
+
+
+
