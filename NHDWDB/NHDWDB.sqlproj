@@ -71,6 +71,8 @@
     <None Include="etl notes.sql" />
     <None Include="Transfer_Good_data\ETL Measurement.sql" />
     <None Include="Filters\Filter_measurement.sql" />
+    <None Include="Transfer_Good_data\ETL Patient.sql" />
+    <None Include="Transfer_Good_data\Patient ELT Final.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ETL\ETL.sql" />
