@@ -8,16 +8,16 @@
 ----set up the remote login mechanaisim, ****for a regular server**** --------
 ------------------------------------------------------------------------------
 ------------need to modify the db instance to accept the new paramter group---
---use master;
+use master;
 
---RECONFIGURE;
+RECONFIGURE;
 
---exec sp_configure 'show advanced options', 1;  
+exec sp_configure 'show advanced options', 1;  
 
---RECONFIGURE;
+RECONFIGURE;
 
---exec sp_configure 'Ad Hoc Distributed Queries', 1;  
-
+exec sp_configure 'Ad Hoc Distributed Queries', 1;  
+RECONFIGURE;
 
 --GO  
 
@@ -280,7 +280,7 @@ CREATE TYPE TESTMEASUREMENTTABLE AS TABLE (
     MEASUREMENTID INT NOT NULL, --THE ID NUMBER RELATED TO EACH MEASUREMENT
     DATAPOINTNUMBER INT NOT NULL, --EACH MEASUREMENT HAS EITHER ONE OR MANY DATA POINTS ASSOCIATED WITH IT, E.G., 1, 2, 3
     MEASUREMENTNAME NVARCHAR(50) NOT NULL, --THE NAME OF THE MEASUREMENT TO BE TAKEN E.G., ”BREATHLESSNESS”
-    [NAME] NVARCHAR(50) NULL, --NAME OF THE DATA POINT MEASUREMENT  MATCHES UP WITH MEASUREMENT NAME E.G., ‘MOBILITY'
+    [NAME] NVARCHAR(50) NULL, --NAME OF THE DATA POINT MEASUREMENT  MATCHES UP WITH MEASUREMENT NAME E.G., C:\Users\ben_g\Source\Repos\NHDWDB\NHDWDB\DIM_PATIENT_FILTER_1.sql‘MOBILITY'
     UPPERLIMIT INT NOT NULL, -- MAX REPORTABLE VALUE, E.G., 100, 600, 5  
     LOWERLIMIT INT NOT NULL --MIN REPORTABLE VALUE E.G., 1, 0  
 );
@@ -433,4 +433,13 @@ SET CurrentYear = DATEDIFF(yy, GETDATE(), DATE),
 --------------------------- populate the patient dimension table-------------------------------
 
 
+-----------------------------------------------------------------------------------------------
 
+--------------------------------call the etl process--------------------------
+EXEC ETL_NHRM;
+
+select * from
+DIMPATIENT
+
+select *
+FROM ERRORevent

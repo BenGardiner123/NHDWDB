@@ -58,20 +58,27 @@
     <Folder Include="Properties" />
     <Folder Include="Filters" />
     <Folder Include="Transfer_Good_data" />
+    <Folder Include="ETL" />
+    <Folder Include="Idea for setup of etl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DWDDL.sql" />
-    <None Include="DIM_PATIENT_FILTER_1.sql" />
-    <None Include="ETL_NHRM.sql" />
     <None Include="TEST_TABLE.sql" />
     <None Include="CHECK_NEW_DATA_ETL.sql" />
     <None Include="dateScript.sql" />
     <None Include="setup.sql" />
     <None Include="Filters\Filter_Patient.sql" />
-    <None Include="Transfer_Good_data\etl nhrm patient.sql" />
-    <None Include="ETL.sql" />
     <None Include="etl notes.sql" />
     <None Include="Transfer_Good_data\ETL Measurement.sql" />
     <None Include="Filters\Filter_measurement.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ETL\ETL.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ETL\ETL_NHRM.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Idea for setup of etl\DIM_PATIENT_FILTER_1.sql" />
   </ItemGroup>
 </Project>
