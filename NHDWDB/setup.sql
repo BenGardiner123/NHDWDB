@@ -303,6 +303,22 @@ CREATE TYPE TEST_TREAMENT_TABLE AS TABLE (
 
 GO
 
+USE NHDW
+DROP TYPE IF EXISTS TEST_EPISODE_TABLE;
+
+GO
+
+-- Create a table varible to pass the new data into - then we can pass this into each filter
+
+CREATE TYPE TEST_EPISODE_TABLE AS TABLE (
+   
+   	
+    );
+
+GO
+
+
+
 -------------------------------------populate the dwdate table-------------------------------------
 use NHDW
 

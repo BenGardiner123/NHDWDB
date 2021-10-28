@@ -353,3 +353,127 @@ on s.roleid = sr.Roleid
 
 select *
 from StaffRole
+
+
+---------------------------------- query to get the valeus for my fact table called interventino table---------------------------
+
+-----select CONVERT(CHAR(8), pm.FrequencySetDate, 112) creates a converted date - 
+---https://www.mssqltips.com/sqlservertip/6452/sql-convert-date-to-yyyymmdd/
+--from patientmeasurement pm
+
+select pm.Frequency, pm.FrequencySetDate, mr.dateTimeRecorded, dr.[value]
+from patientmeasurement pm
+inner join MeasurementRecord mr
+on pm.measurementid = mr.MeasurementID
+and pm.CategoryID = mr.CategoryID
+and pm.URNumber = mr.URNumber
+inner join DataPointRecord dr
+on mr.MeasurementRecordID = dr.MeasurementRecordID
+
+--with dates convert
+
+select pm.Frequency, CONVERT(CHAR(8), pm.FrequencySetDate, 112), CONVERT(CHAR(8), mr.dateTimeRecorded, 112), dr.[value]
+from patientmeasurement pm
+inner join MeasurementRecord mr
+on pm.measurementid = mr.MeasurementID
+and pm.CategoryID = mr.CategoryID
+and pm.URNumber = mr.URNumber
+inner join DataPointRecord dr
+on mr.MeasurementRecordID = dr.MeasurementRecordID
+
+
+--------------------GETTING THE QUERY SORTED FOR LOADING THE FACT TABLE------------------------------
+-----------------------------------------------------------------------------------------------------
+--DROP TYPE IF EXISTS TEST_EPISODE_TABLE
+--GO
+--CREATE TYPE TEST_EPISODE_TABLE as TABLE(
+--URNumber        NVARCHAR(50),
+--MeasurementID   INT,
+--DatapointNumber INT,
+--FrequenceySetDate CHAR(8),
+--DatetimeRecorded  CHAR(8),
+--Frequency         INT,
+--[Value]           FLOAT
+--);
+
+drop table if exists DWEPISODE
+
+--- dropped the dateid row - i didnt need it, swapped order - patient at top
+
+CREATE TABLE DWEPISODE(
+	DWFACT_EPISODEID INT IDENTITY(1,1) NOT NULL, --THE SURROGATE KEY
+	DWDIM_PATIENTID INT NOT NULL, --REFERS TO THE SURROGATE KEY FROM THE PATIENT DIMENSION TABLE 
+	DWDIM_MEASUREMENTID INT NOT NULL, --REFERS TO THE PRIMARY KEY IN THE DIMMEASUREMENT TABLE
+	DATETIMERECORDED CHAR(8) NOT NULL, --REFERS TO THE DATE AND TIME THAT THE EPISODE BETWEEN PATIENT AND CLINICIAN OCCURS E.G(2021-09-01	12:12:22.00)
+	FREQUENCYSETDATE CHAR(8) NOT NULL, --REFERS TO THE DATE AND TIME THE CLINICIAN SETS THE FREQUENCY E.G (2021-09-01 12:12:22.00)
+	FREQUENCY INT NOT NULL, -- THE NUMBER OF DAYS BETWEEN MEASUREMENTS (31 OR 7 etc..)
+	[VALUE] FLOAT(10) NOT NULL, -- ACTUAL VALUE TAKEN E.G (1.0 OR 2.3)
+	
+	CONSTRAINT PK_FACTEPISODE PRIMARY KEY CLUSTERED (DWFACT_EPISODEID ASC)
+);
+
+BEGIN
+DECLARE @SELECTQUERY NVARCHAR(MAX);
+	-- GET CONNECTION STRING.
+    DECLARE @CONNSTRING NVARCHAR(MAX);
+    EXEC @CONNSTRING = GET_CONNECTION_STRING;
+	SET @SELECTQUERY = '''SELECT P.URNUMBER, DP.MEASUREMENTID, DP.DATAPOINTNUMBER, CONVERT(CHAR(8), PM.FREQUENCYSETDATE, 112) as freqencysetdate, '+
+                       'CONVERT(CHAR(8), MR.DATETIMERECORDED, 112)as datetimerecorded, PM.FREQUENCY, DR.[VALUE] ' +
+                       'FROM DDDM_TPS_1.DBO.PATIENT P ' +
+                       'INNER JOIN DDDM_TPS_1.DBO.PATIENTCATEGORY PC ' +
+                       'ON P.URNUMBER = PC.URNUMBER ' +
+					   'INNER JOIN DDDM_TPS_1.DBO.PATIENTMEASUREMENT PM ' +
+					   'ON PM.CATEGORYID = PC.CATEGORYID ' +
+					   'AND PM.URNUMBER = PC.URNUMBER ' +
+					   'INNER JOIN DDDM_TPS_1.DBO.MEASUREMENTRECORD MR ' +
+					   'ON PM.MEASUREMENTID = MR.MEASUREMENTID ' +
+					   'AND PM.CATEGORYID = MR.CATEGORYID ' +
+					   'AND PM.URNUMBER = MR.URNUMBER ' +
+					   'INNER JOIN DDDM_TPS_1.DBO.DATAPOINTRECORD DR ' +
+					   'ON MR.MEASUREMENTRECORDID = DR.MEASUREMENTRECORDID ' +
+                       'INNER JOIN DDDM_TPS_1.DBO.DATAPOINT DP ' +
+                       'ON DP.MEASUREMENTID = DR.MEASUREMENTID ' +
+                       'AND DP.DATAPOINTNUMBER = DR.DATAPOINTNUMBER'
+	--Print @SELECTQUERY;
+    DECLARE @COMMAND NVARCHAR(MAX);
+    SET @COMMAND = 'SELECT * FROM OPENROWSET(''SQLNCLI'', ' +
+                    '''' + @CONNSTRING + ''',' + @SELECTQUERY+''') SOURCE;'
+    --PRINT(@COMMAND);
+     --EXEC(@COMMAND);
+	 DECLARE @FromDatapointRecord TEST_EPISODE_TABLE;
+	 INSERT INTO @FromDatapointRecord
+	 EXEC(@COMMAND);
+
+	 SELECT * FROM @FromDatapointRecord;
+	 
+	 EXEC INSERTFACT @DATA = @FromDatapointRecord;
+END
+
+
+----------------this is the insertFACT stored proc--------------
+drop procedure if exists  INSERTFACT
+go
+CREATE PROCEDURE INSERTFACT @DATA TEST_EPISODE_TABLE readonly as
+BEGIN
+	BEGIN TRY
+
+		insert into DWEPISODE(DWDIM_PATIENTID, DWDIM_MEASUREMENTID, DATETIMERECORDED, FREQUENCYSETDATE, FREQUENCY, [VALUE])
+		select DWDIM_PATIENTID, DWDIM_MEASUREMENTID, DATETIMERECORDED, FrequenceySetDate, Frequency, [Value]
+		from DIMPATIENT p
+		inner join @DATA d
+		on p.DWDIM_SOURCEID = d.URNumber
+		inner join DIMEASUREMENT dm
+		on dm.MEASUREMENTID = d.MeasurementID
+		and dm.DATAPOINTNUMBER = d.DatapointNumber
+		inner join DWDATE dd
+		on dd.DateKey = d.DatetimeRecorded
+		inner join DWDATE dd2
+		on dd2.DateKey = d.FrequenceySetDate
+		
+
+	END TRY
+	BEGIN CATCH
+
+	END CATCH
+
+END
